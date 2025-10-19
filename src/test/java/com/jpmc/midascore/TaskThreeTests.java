@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.jpmc.midascore.entity.UserRecord;
+
 @SpringBootTest
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
@@ -22,6 +24,9 @@ public class TaskThreeTests {
 
     @Autowired
     private FileLoader fileLoader;
+    
+    @Autowired
+    private com.jpmc.midascore.repository.UserRepository userRepository;
 
     @Test
     void task_three_verifier() throws InterruptedException {
@@ -32,6 +37,12 @@ public class TaskThreeTests {
         }
         Thread.sleep(2000);
 
+        UserRecord waldorf = userRepository.findByName("waldorf");
+        if (waldorf != null) {
+            System.out.println("Waldorf balance: " + Math.floor(waldorf.getBalance()));
+        } else {
+            System.out.println("Waldorf user not found!");
+        }
 
         logger.info("----------------------------------------------------------");
         logger.info("----------------------------------------------------------");
