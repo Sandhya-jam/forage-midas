@@ -1,12 +1,14 @@
 package com.jpmc.midascore.component;
 
 import com.jpmc.midascore.entity.TransactionRecord;
+import com.jpmc.midascore.foundation.Incentive;
 import com.jpmc.midascore.entity.UserRecord;
 import com.jpmc.midascore.repository.TransactionRecordRepository;
 import com.jpmc.midascore.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDateTime;
 
 @Service
@@ -14,6 +16,9 @@ public class TransactionService {
     
     private final UserRepository userRepository;
     private final TransactionRecordRepository transactionRecordRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     public TransactionService(UserRepository userRepository,TransactionRecordRepository transactionRecordRepository){
         this.userRepository=userRepository;
@@ -34,11 +39,14 @@ public class TransactionService {
             System.out.println("Transaction discarded: insufficient balance");
             return;
         }
-
+        
+        String incentiveUrl="http://localhost:8080/incentive";
+        Incentive incentiveResponse=restTemplate.postForObject(incentiveUrl, transaction, Incentive.class);
+        float incentiveAmount=(incentiveResponse!=null)?incentiveResponse.getAmount():0;
         //Update Balance
         sender.setBalance(sender.getBalance()-transaction.getAmount());
-        recipient.setBalance(recipient.getBalance()+transaction.getAmount());
-
+        recipient.setBalance(recipient.getBalance()+transaction.getAmount()+incentiveAmount);
+        
         userRepository.save(sender);
         userRepository.save(recipient);
 

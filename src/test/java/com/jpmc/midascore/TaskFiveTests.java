@@ -35,18 +35,16 @@ public class TaskFiveTests {
         for (String transactionLine : transactionLines) {
             kafkaProducer.send(transactionLine);
         }
-        Thread.sleep(2000);
+        // wait until balances are updated
+        Thread.sleep(5000); // 5 seconds just to be safe
 
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("submit the following output to complete the task (include begin and end output denotations)");
-        StringBuilder output = new StringBuilder("\n").append("---begin output ---").append("\n");
+        System.out.println("---begin output ---");
         for (int i = 0; i < 13; i++) {
             Balance balance = balanceQuerier.query((long) i);
-            output.append(balance.toString()).append("\n");
+            System.out.println(balance.toString());
         }
-        output.append("---end output ---");
-        logger.info(output.toString());
+        System.out.println("---end output ---");
+        System.out.flush();
+
     }
 }
